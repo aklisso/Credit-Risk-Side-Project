@@ -1,2 +1,2 @@
 # Credit-Risk-Side-Project
-Predicting credit risk based on the German Credit Risk data set and creating an interactive dashboard, using R and Tableau.
+This project aims to predict whether an individual will default on a loan using ML techniques in R. The data come from the German Credit Risk data set (https://www.kaggle.com/datasets/varunchawla30/german-credit-data). The project will also include an interactive Tableau dashboard communicating results/insights.
