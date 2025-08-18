@@ -80,4 +80,26 @@ summary(credit)
 #Credit risk: 70-30 split- not too bad! Might need to oversample.
 
 
-#Split into training/testing before examining bivariate relationships
+#Split into training/validation/testing before examining bivariate relationships
+# 60-30-10 split because we have a good amount of data, but not a ton
+# My statistics professor has recommended 70-20-10 for large datasets, and 50-40-10 for smaller
+# So this is a middle ground
+library(splitTools)
+set.seed(2025)
+partition = c(train = 0.6, valid = 0.3, test = 0.1)
+inds = partition(credit$credit_risk, p = partition)
+inds
+train = credit[inds$train,]
+valid = credit[inds$valid,]
+test = credit [inds$test, ]
+
+#Running logistic regression ONLY to get GVIF
+full_model = glm(credit_risk ~., data = train, 
+                  family = binomial(link="logit"))
+library(car)
+vifs = vif(full_model)
+#purpose, employment duration, property, housing are all > 4
+#a value >5 indicates multicollinearity, so we will be wary of these.
+#Regularized regression might be more appropriate than logistic for this data
+lasso = glmnet(x = train_x, )
+#use this code: https://bookdown.org/tpinto_home/Regularisation/lasso-regression.html
