@@ -23,19 +23,19 @@ test.s = test.s %>% mutate (amount.s = (amount-mean(amount))/sd(amount))
 test.s = test.s %>% mutate (age.s = (age-mean(age))/sd(age))
 test.s = test.s %>% select(-c(duration, amount, age))
 
-#Lasso regression with cross validation on training data
+#elasticnet regression with cross validation on training data
 library(glmnet)
 set.seed(2025)
 X = model.matrix(credit_risk ~ ., data= train.s) [,-1]
 y = train.s$credit_risk
 
 #Find best lambda using CV
-credit_lasso = cv.glmnet(x=X, y=y, alpha=1, family=binomial(link="logit"))
-cv_lasso_lambda = credit_lasso$lambda.1se #best MSE achieved when lambda = 0.01738841
+credit_elasticnet = cv.glmnet(x=X, y=y, alpha=1, family=binomial(link="logit"))
+cv_elasticnet_lambda = credit_elasticnet$lambda.1se #best MSE achieved when lambda = 0.01738841
 
-#Coefficients for Lasso
-coef(credit_lasso, s = cv_lasso_lambda)
+#Coefficients for elasticnet
+coef(credit_elasticnet, s = cv_elasticnet_lambda)
 
-#Predicted values for Lasso
-lasso_pred = predict(credit_lasso, X, s = cv_lasso_lambda, type = "response")
+#Predicted values for elasticnet
+elasticnet_pred = predict(credit_elasticnet, X, s = cv_elasticnet_lambda, type = "response")
 # note: type = "response" gives predicted probabilities. default is "link" which gives logits
