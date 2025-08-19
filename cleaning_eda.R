@@ -100,6 +100,10 @@ library(car)
 vifs = vif(full_model)
 #purpose, employment duration, property, housing are all > 4
 #a value >5 indicates multicollinearity, so we will be wary of these.
-#Regularized regression might be more appropriate than logistic for this data
-lasso = glmnet(x = train_x, )
-#use this code: https://bookdown.org/tpinto_home/Regularisation/lasso-regression.html
+
+#Regularized regression might be more appropriate than logistic for this data due to multicollinearity
+
+#Write cleaned data to CSV
+write.csv(train, "credit_train.csv", row.names = FALSE)
+write.csv(valid, "credit_valid.csv", row.names = FALSE)
+write.csv(test, "credit_test.csv", row.names = FALSE)
