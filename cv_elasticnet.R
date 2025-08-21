@@ -61,11 +61,12 @@ en_v_class = ifelse(en_v_pred > 0.6150302, 1, 0)
 #Confusion matrix
 library(caret)
 confusionMatrix(table(en_v_class,valid$credit_risk))
-#Everything looks good to me except PPV (probability someone pred. risky truly is risky) is a bit low
+#Everything looks OK to me except PPV (probability someone pred. risky truly is risky) is a bit low
 #This means the bank could miss out on $$$ from loan interest if they don't approve the loan
 
-#Next: conduct research to see what the optimal balance of sens/spec is in this scenario and
-# adjust cutoff accordingly
+#Next: potentially use this as a base model and stack models to improve AUC
+#NOTE: I might have to come back to this with data that has been processed using feature selection (FS)
+# to better reduce multicollinearity
 
 
 
