@@ -86,8 +86,8 @@ summary(credit)
 # So this is a middle ground
 library(splitTools)
 set.seed(2025)
-partition = c(train = 0.6, valid = 0.3, test = 0.1)
-inds = partition(credit$credit_risk, p = partition)
+split = c(train = 0.6, valid = 0.3, test = 0.1)
+inds = splitTools::partition(credit$credit_risk, split) #must specificy splitTools due to conflict w/ mlr3 package used later
 inds
 train = credit[inds$train,]
 valid = credit[inds$valid,]
@@ -99,11 +99,10 @@ full_model = glm(credit_risk ~., data = train,
 library(car)
 vifs = vif(full_model)
 #purpose, employment duration, property, housing are all > 4
-#a value >5 indicates multicollinearity, so we will be wary of these.
-
-#Regularized regression might be more appropriate than logistic for this data due to multicollinearity
+#According to online sources a value >4 may indicate multicollinearity, so we will address this
 
 #Write cleaned data to CSV
+write.csv(credit, "credit_cleaned.csv", row.names=FALSE)
 write.csv(train, "credit_train.csv", row.names = FALSE)
 write.csv(valid, "credit_valid.csv", row.names = FALSE)
 write.csv(test, "credit_test.csv", row.names = FALSE)
