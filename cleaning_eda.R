@@ -87,6 +87,7 @@ summary(credit)
 library(splitTools)
 set.seed(2025)
 split = c(train = 0.6, valid = 0.3, test = 0.1)
+#Stratified split based on outcome
 inds = splitTools::partition(credit$credit_risk, split) #must specificy splitTools due to conflict w/ mlr3 package used later
 inds
 train = credit[inds$train,]
