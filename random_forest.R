@@ -29,6 +29,7 @@ valid = valid %>% mutate (across(all_of(cat_vars), as.factor))
 #Find AUC on validation data
 valid.pred= predict(rf.model, newdata=valid, type = "prob")
 valid.pred = valid.pred[,2]
+library(pROC)
 roc.valid = roc(valid$credit_risk, valid.pred)
 auc(roc.valid) #not horrible- 0.778
 
