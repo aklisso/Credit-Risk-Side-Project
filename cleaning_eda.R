@@ -80,6 +80,39 @@ summary(credit)
 #Credit risk: 70-30 split- not too bad! Might need to oversample.
 
 
+#Collapse factors in "purpose" since 4/5, 8/10 have very few
+table(credit$purpose) #looks like nobody even has education as a value
+#First, Recode the factor, otherwise the numbers will get all messed up
+library(forcats)
+credit$purpose = fct_recode(credit$purpose,
+                            "other" = "0",
+                            "car (new)" = "1",
+                            "car (used)" = "2",
+                            "furniture/equipment" = "3",
+                            "radio/television" = "4",
+                            "domestic appliances" = "5",
+                            "repairs" = "6",
+                            "vacation" = "8",
+                            "retraining" = "9",
+                            "business" = "10"
+)
+table(credit$purpose) #check it's right
+credit$purpose = fct_collapse(credit$purpose,
+                              "electronics/appliances" = c("radio/television","domestic appliances"),
+                              "travel" = c("vacation","retraining"))
+table(credit$purpose) #check it's right
+
+table(credit$number_credits) #could collapse 3, 4, since 4 has so few
+credit$number_credits = fct_recode(credit$number_credits,
+                                   "1" = "1",
+                                   "2-3" = "2",
+                                   "4-5" = "3",
+                                   ">=6" = "4")
+credit$number_credits = fct_collapse(credit$number_credits,
+                                     ">=4" = c("4-5", ">=6"))
+table(credit$number_credits) #verifying it was done correctly
+
+
 #Split into training/validation/testing before examining bivariate relationships
 # 60-30-10 split because we have a good amount of data, but not a ton
 # My statistics professor has recommended 70-20-10 for large datasets, and 50-40-10 for smaller
@@ -99,11 +132,22 @@ full_model = glm(credit_risk ~., data = train,
                   family = binomial(link="logit"))
 library(car)
 vifs = vif(full_model)
-#purpose, employment duration, property, housing are all > 4
-#According to online sources a value >4 may indicate multicollinearity, so we will address this
+#employment duration, property, housing are all > 4. But collapsing categories isn't necessary.
+table(credit$employment_duration)
+table(credit$property)
+table(credit$housing)
+
+#According to online sources a value >4 may indicate multicollinearity, so we will address this later.
 
 #Write cleaned data to CSV
 write.csv(credit, "credit_cleaned.csv", row.names=FALSE)
 write.csv(train, "credit_train.csv", row.names = FALSE)
 write.csv(valid, "credit_valid.csv", row.names = FALSE)
 write.csv(test, "credit_test.csv", row.names = FALSE)
+
+
+
+
+
+
+

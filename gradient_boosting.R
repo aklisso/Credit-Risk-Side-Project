@@ -17,8 +17,20 @@ library(gbm)
 library(MASS)
 
 #optimal number of iterations/trees
-n_iter = gbm.perf(gbm.model, plot.it=TRUE, oobag.curve = FALSE, method = "cv")
-
+gbm.model = gbm(
+  formula = credit_risk ~ .,
+  data = train,
+  distribution = "bernoulli", #loss function for classification
+  n.trees = 500, #max number of iterations, we will later find best one with gbm.perf
+  interaction.depth = 1, 
+  shrinkage = 0.1,
+  cv.folds = 5,
+  n.minobsinnode = 20, #minimum leaf size
+  class.stratify.cv = TRUE #stratify cross validation by credit_risk
+)
+#Tune model
+n_iter = gbm.perf(gbm.model, plot.it=FALSE, oobag.curve = FALSE, method = "cv")
+#Try again
 gbm.model = gbm(
   formula = credit_risk ~ .,
   data = train,
@@ -30,7 +42,6 @@ gbm.model = gbm(
   n.minobsinnode = 20, #minimum leaf size
   class.stratify.cv = TRUE #stratify cross validation by credit_risk
 )
-
 
 
 #AUC on validation data
@@ -51,6 +62,5 @@ train.pred= predict(gbm.model, n.trees = gbm.model$n.trees,
 roc.train = roc(train$credit_risk, train.pred)
 auc(roc.train)
 
-
-#is AUC on training = 0.833 and AUC on validation 0.778 ok?
+#is AUC on training ~ 0.83 and AUC on validation 0.78 ok?
 

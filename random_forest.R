@@ -38,7 +38,7 @@ auc(roc.valid) #not horrible- 0.778
 train.pred= predict(rf.model, type = "prob")
 train.pred = train.pred[,2]
 roc.train = roc(train$credit_risk, train.pred)
-auc(roc.train) #AUC is 0.78 - doesn't look like overfitting is happening :) 
+auc(roc.train) #AUC is 0.79 - doesn't look like overfitting is happening :) 
 
 #Next- tune hyperparameters
 

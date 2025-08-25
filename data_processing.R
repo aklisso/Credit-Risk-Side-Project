@@ -33,6 +33,8 @@ feature_score_df = data.frame(
 #sort in descending order and choose the top few features
 feature_score_df = feature_score_df %>% arrange(desc(score))
 topfeatures = head(feature_score_df, n = 16)$feature
+#Got rid of number_credits, telephone, people_liable, age
+
 #Create new training dataset - training, feature selection, information gain
 train_fs_ig = train_full %>% select(any_of(topfeatures), credit_risk)
 
