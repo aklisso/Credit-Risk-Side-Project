@@ -19,6 +19,19 @@ test.s = test %>% mutate (duration.s = (duration-mean(duration))/sd(duration))
 test.s = test.s %>% mutate (amount.s = (amount-mean(amount))/sd(amount))
 test.s = test.s %>% select(-c(duration, amount))
 
+
+#Factorize categorical variables
+cat_vars = c("checkings", "credit_history", "purpose", "savings", 
+             "employment_duration", "installment_rate", 
+             "personal_status_sex", "other_debtors", "present_residence", 
+             "property", "other_installment_plans","housing",
+             "job","foreign_worker", "credit_risk")
+
+library(dplyr)
+train = train %>% mutate (across(all_of(cat_vars), as.factor))
+valid = valid %>% mutate (across(all_of(cat_vars), as.factor))
+test = test %>% mutate (across(all_of(cat_vars), as.factor))
+
 #elasticnet regression with cross validation on training data
 library(glmnet)
 set.seed(2025)
