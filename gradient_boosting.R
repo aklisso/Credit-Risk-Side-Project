@@ -62,5 +62,3 @@ train.pred= predict(gbm.model, n.trees = gbm.model$n.trees,
 roc.train = roc(train$credit_risk, train.pred)
 auc(roc.train)
 
-#is AUC on training ~ 0.83 and AUC on validation 0.78 ok?
-
