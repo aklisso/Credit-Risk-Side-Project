@@ -86,11 +86,11 @@ table(credit$purpose) #looks like nobody even has education as a value
 library(forcats)
 credit$purpose = fct_recode(credit$purpose,
                             "other" = "0",
-                            "car (new)" = "1",
-                            "car (used)" = "2",
-                            "furniture/equipment" = "3",
-                            "radio/television" = "4",
-                            "domestic appliances" = "5",
+                            "car_new" = "1",
+                            "car_used" = "2",
+                            "furniture_equipment" = "3",
+                            "radio_television" = "4",
+                            "domestic_appliances" = "5",
                             "repairs" = "6",
                             "vacation" = "8",
                             "retraining" = "9",
@@ -98,18 +98,18 @@ credit$purpose = fct_recode(credit$purpose,
 )
 table(credit$purpose) #check it's right
 credit$purpose = fct_collapse(credit$purpose,
-                              "electronics/appliances" = c("radio/television","domestic appliances"),
+                              "electronics_appliances" = c("radio_television","domestic_appliances"),
                               "travel" = c("vacation","retraining"))
 table(credit$purpose) #check it's right
 
 table(credit$number_credits) #could collapse 3, 4, since 4 has so few
 credit$number_credits = fct_recode(credit$number_credits,
                                    "1" = "1",
-                                   "2-3" = "2",
-                                   "4-5" = "3",
-                                   ">=6" = "4")
+                                   "2_to_3" = "2",
+                                   "4_to_5" = "3",
+                                   "6_or_more" = "4")
 credit$number_credits = fct_collapse(credit$number_credits,
-                                     ">=4" = c("4-5", ">=6"))
+                                     "4_or_more" = c("4_to_5", "6_or_more"))
 table(credit$number_credits) #verifying it was done correctly
 
 
@@ -146,6 +146,8 @@ write.csv(valid, "credit_valid.csv", row.names = FALSE)
 write.csv(test, "credit_test.csv", row.names = FALSE)
 
 
+#***THERE ARE SPACES IN THE VARIABLE VALUES FOR PURPOSE - MUST FIX THIS
+#***For PURPOSE get rid of all funky characters like parentheses, spaces, slash, etc.
 
 
 
