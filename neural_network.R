@@ -1,3 +1,4 @@
+#NOTE: MODEL IS OVERFITTING, NEED TO DO MORE TROUBLESHOOTING
 train = read.csv("train_fs_ig.csv")
 valid = read.csv("valid_fs_ig.csv")
 test = read.csv("test_fs_ig.csv")
