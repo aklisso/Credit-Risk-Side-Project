@@ -54,40 +54,45 @@ colnames(train.nn)[1] = "credit_risk"
 valid.nn <- as.data.frame(cbind(valid$credit_risk, valid.d))
 colnames(valid.nn)[1] = "credit_risk"
 
-#Oversample rare event in training data - COME BACK AND RERUN MODEL LATER AFTER THIS
-library(ROSE)
-train.balanced <- ROSE(credit_risk ~ ., data = train.nn)$data
+#Oversample rare event in training data - this ended up creating overfitting so I will not use it.
+#library(ROSE)
+#train.balanced <- ROSE(credit_risk ~ ., data = train.nn)$data
 # Check for class balance after balancing
-print(table(train.balanced$credit_risk))
+#print(table(train.balanced$credit_risk))
 
 #Create formula to copy/paste into neuralnet.model since credit_risk ~ . won't work
 # (also calling "eqn" in the model won't work either)
-predictors = setdiff(colnames(train.balanced), "credit_risk")
+predictors = setdiff(colnames(train.nn), "crendit_risk")
 rhs = paste(predictors, collapse = " + ")
 eqn = as.formula(paste("credit_risk", rhs, sep = " ~ "))
 
+set.seed(2025) #ensure results are consistent
 library(neuralnet)
 neuralnet.model = neuralnet(
   eqn,
-  data = train.balanced, #try changing this to train.balanced and try again
-  hidden = c(5,3),
+  data = train.nn, #try changing this to train.balanced and try again
+  hidden = 6,
   err.fct = "ce", #cross entropy error facet
   rep = 10,
   stepmax = 1e6,
   linear.output = FALSE
 )
 
-valid.pred = predict(neuralnet.model, newdata=valid.nn, type = "response")
-valid.pred
+#data = train.nn, hidden= 10 - AUC train of .82, AUC valid of 0.71 
+#data = train.nn, hidden= 18 - AUC train of .82, AUC valid of 0.69
+#data = train.nn, hidden= 7 - AUC train of .79, AUC valid of 0.73 - looks like winner so far
+#data = train.nn, hidden= 6 - AUC train of .80, AUC valid of 0.70 
 
+
+#AUC on training
+train.pred = predict(neuralnet.model, train.nn, type="response")
+roc.train = roc(train.balanced$credit_risk, as.vector(train.pred))
+auc(roc.train)
+
+#AUC on validation
+valid.pred = predict(neuralnet.model, newdata=valid.nn, type = "response")
 library(pROC)
 roc.valid = roc(valid$credit_risk, as.vector(valid.pred))
-auc(roc.valid) #0.60... not horrible but not awesome. 
+auc(roc.valid)
 
-
-train.pred = predict(neuralnet.model, train.balanced, type="response")
-train.pred
-roc.train = roc(train.balanced$credit_risk, as.vector(train.pred))
-roc.train #0.999 - DEFINITELY overfitting. 
-
-#another article used gradient descent and this algorithm uses backpropagation - might want to look into diff packages
+#might need to try a more advanced package like keras
