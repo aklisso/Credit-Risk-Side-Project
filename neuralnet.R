@@ -1,4 +1,3 @@
-#NOTE: MODEL IS OVERFITTING, NEED TO DO MORE TROUBLESHOOTING
 train = read.csv("train_fs_ig.csv")
 valid = read.csv("valid_fs_ig.csv")
 test = read.csv("test_fs_ig.csv")
@@ -62,7 +61,7 @@ colnames(valid.nn)[1] = "credit_risk"
 
 #Create formula to copy/paste into neuralnet.model since credit_risk ~ . won't work
 # (also calling "eqn" in the model won't work either)
-predictors = setdiff(colnames(train.nn), "crendit_risk")
+predictors = setdiff(colnames(train.nn), "credit_risk")
 rhs = paste(predictors, collapse = " + ")
 eqn = as.formula(paste("credit_risk", rhs, sep = " ~ "))
 
@@ -70,7 +69,7 @@ set.seed(2025) #ensure results are consistent
 library(neuralnet)
 neuralnet.model = neuralnet(
   eqn,
-  data = train.nn, #try changing this to train.balanced and try again
+  data = train.nn, 
   hidden = 6,
   err.fct = "ce", #cross entropy error facet
   rep = 10,
@@ -78,21 +77,13 @@ neuralnet.model = neuralnet(
   linear.output = FALSE
 )
 
-#data = train.nn, hidden= 10 - AUC train of .82, AUC valid of 0.71 
-#data = train.nn, hidden= 18 - AUC train of .82, AUC valid of 0.69
-#data = train.nn, hidden= 7 - AUC train of .79, AUC valid of 0.73 - looks like winner so far
-#data = train.nn, hidden= 6 - AUC train of .80, AUC valid of 0.70 
-
-
 #AUC on training
 train.pred = predict(neuralnet.model, train.nn, type="response")
-roc.train = roc(train.balanced$credit_risk, as.vector(train.pred))
+roc.train = roc(train.nn$credit_risk, as.vector(train.pred))
 auc(roc.train)
 
 #AUC on validation
 valid.pred = predict(neuralnet.model, newdata=valid.nn, type = "response")
 library(pROC)
-roc.valid = roc(valid$credit_risk, as.vector(valid.pred))
+roc.valid = roc(valid.nn$credit_risk, as.vector(valid.pred))
 auc(roc.valid)
-
-#might need to try a more advanced package like keras
