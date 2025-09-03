@@ -43,6 +43,11 @@ credit = credit %>% mutate (across(all_of(cat_vars), as.factor))
 #right now installment rate is ordered from highest to lowest, but I won't switch it because then I can't refer to the data
 # dictionary on Kaggle
 
+table(credit$credit_risk)
+#Credit Risk is 0=poor, 1=good. I would think intuitively that 1 is the event (poor), so let's switch them.
+credit$credit_risk= if_else(credit$credit_risk==0, 1, 0)
+
+
 #univariate EDA on numerical variables
 library(ggplot2)
 ggplot(credit, aes(x=duration)) + geom_histogram()
