@@ -7,25 +7,25 @@ test <- read.csv("test_fs_ig.csv")
 library(dplyr)
 train.s = train %>% mutate (duration.s = (duration-mean(duration))/sd(duration))
 train.s = train.s %>% mutate (amount.s = (amount-mean(amount))/sd(amount))
-train.s = train.s %>% select(-c(duration, amount))
+train.s = train.s %>% dplyr::select(-c(duration, amount))
 
 #Validation
 valid.s = valid %>% mutate (duration.s = (duration-mean(duration))/sd(duration))
 valid.s = valid.s %>% mutate (amount.s = (amount-mean(amount))/sd(amount))
-valid.s = valid.s %>% select(-c(duration, amount))
+valid.s = valid.s %>% dplyr::select(-c(duration, amount))
 
 #Test
 test.s = test %>% mutate (duration.s = (duration-mean(duration))/sd(duration))
 test.s = test.s %>% mutate (amount.s = (amount-mean(amount))/sd(amount))
-test.s = test.s %>% select(-c(duration, amount))
+test.s = test.s %>% dplyr::select(-c(duration, amount))
 
 
 #Factorize categorical variables
 cat_vars = c("checkings", "credit_history", "purpose", "savings", 
-             "employment_duration", "installment_rate", 
-             "personal_status_sex", "other_debtors", "present_residence", 
+             "employment_duration",  
+             "personal_status_sex", "other_debtors",
              "property", "other_installment_plans","housing",
-             "job","foreign_worker", "credit_risk")
+             "foreign_worker", "credit_risk")
 train = train %>% mutate (across(all_of(cat_vars), as.factor))
 valid = valid %>% mutate (across(all_of(cat_vars), as.factor))
 test = test %>% mutate (across(all_of(cat_vars), as.factor))
@@ -38,7 +38,7 @@ y = train.s$credit_risk
 
 #Find best lambda using CV
 credit_elasticnet = cv.glmnet(x=X, y=y, alpha=1, family=binomial(link="logit"))
-cv_elasticnet_lambda = credit_elasticnet$lambda.1se #best MSE achieved when lambda = 0.02936188
+cv_elasticnet_lambda = credit_elasticnet$lambda.1se 
 
 #Coefficients for elasticnet
 coef(credit_elasticnet, s = cv_elasticnet_lambda)
@@ -56,8 +56,8 @@ yv = valid.s$credit_risk
 #Must convert to vector because predict() returns a matrix
 en_v_pred = as.vector(predict(credit_elasticnet, Xv, s = cv_elasticnet_lambda, type= "response"))
 cv_elastic_roc = roc(valid$credit_risk, en_v_pred)
-auc(cv_elastic_roc) #AUC is 0.7589
-#Try to find cutoff for event that maximizes sensitivity/specificity: 0.6443343
+auc(cv_elastic_roc) 
+#Try to find cutoff for event that maximizes sensitivity/specificity
 opt_cutoff = coords(cv_elastic_roc, "best", ret = "threshold")
 
 #Get predicted classes (0,1) for validation data
@@ -65,7 +65,7 @@ en_v_class = ifelse(en_v_pred > opt_cutoff[[1]], 1, 0)
 
 #Confusion matrix
 library(caret)
-confusionMatrix(table(en_v_class,valid$credit_risk), positive="1")
+confusionMatrix(table(en_v_class,valid$credit_risk), positive="1") 
 
 
 

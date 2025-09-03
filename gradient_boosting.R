@@ -2,13 +2,15 @@
 
 train = read.csv("train_fs_ig.csv")
 
+colnames(train)
+
 #convert categorical variables to factors
 cat_vars = c("checkings", "credit_history", "purpose", "savings", 
-             "employment_duration", "installment_rate", 
-             "personal_status_sex", "other_debtors", "present_residence", 
+             "employment_duration",  
+             "personal_status_sex", "other_debtors",
              "property", "other_installment_plans","housing",
-             "job","foreign_worker")
-#Note: we leave credit_risk as numeric because that's required for gbm
+             "foreign_worker")
+#Note: we leave credit_risk as numeric because that's required
 
 library(dplyr)
 train = train %>% mutate (across(all_of(cat_vars), as.factor))
@@ -48,12 +50,6 @@ gbm.model = gbm(
 valid = read.csv("valid_fs_ig.csv")
 #Convert categorical variables in validation data to factors
 valid = valid %>% mutate (across(all_of(cat_vars), as.factor))
-#Find AUC on validation data
-valid.pred= predict(gbm.model, newdata=valid, n.trees = gbm.model$n.trees,
-                    type = "response") #get back probability instead of logit
-library(pROC)
-roc.valid = roc(valid$credit_risk, valid.pred)
-auc(roc.valid) 
 
 
 #Check training data AUC to verify overfitting is not occurring
@@ -62,3 +58,17 @@ train.pred= predict(gbm.model, n.trees = gbm.model$n.trees,
 roc.train = roc(train$credit_risk, train.pred)
 auc(roc.train)
 
+#Find AUC on validation data
+valid.pred= predict(gbm.model, newdata=valid, n.trees = gbm.model$n.trees,
+                    type = "response") #get back probability instead of logit
+library(pROC)
+roc.valid = roc(valid$credit_risk, valid.pred)
+auc(roc.valid) 
+
+#get optimal cutoff for event based on ROC
+opt_cutoff = coords(roc.valid, "best", ret = "threshold")
+
+
+library(caret)
+valid.class = ifelse(valid.pred > opt_cutoff[[1]], 1, 0) #classify event based on cutoff
+confusionMatrix(table(valid.class,valid$credit_risk), positive="1") 

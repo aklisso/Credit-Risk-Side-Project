@@ -8,6 +8,7 @@ library(dplyr)
 #Apply feature selection to JUST training set to prevent data leakage
 train_full = read.csv("credit_train.csv")
 
+
 cat_vars = c("checkings", "credit_history", "purpose", "savings", 
              "employment_duration", "installment_rate", 
              "personal_status_sex", "other_debtors", "present_residence", 
@@ -32,11 +33,12 @@ feature_score_df = data.frame(
 )
 #sort in descending order and choose the top few features
 feature_score_df = feature_score_df %>% arrange(desc(score))
-topfeatures = head(feature_score_df, n = 16)$feature
+topfeatures = head(feature_score_df, n = 13)$feature
 #Got rid of number_credits, telephone, people_liable, age
 
 #Create new training dataset - training, feature selection, information gain
-train_fs_ig = train_full %>% select(any_of(topfeatures), credit_risk)
+train_fs_ig = train_full %>% dplyr::select(any_of(topfeatures), credit_risk)
+
 
 #Now, let's see if multicollinearity is reduced from before
 full_model = glm(credit_risk ~., data = train_fs_ig, 
@@ -44,15 +46,15 @@ full_model = glm(credit_risk ~., data = train_fs_ig,
 library(car)
 vifs = vif(full_model)
 vifs
-#Much better, now they're all less than 4 :) 
+#Much better, now they're mostly 4 or less
 
 #Also select the same features from validation/testing sets
 #read in CSV's
 valid_full = read.csv("credit_valid.csv")
 test_full = read.csv("credit_test.csv")
 #Select features from each dataset
-valid_fs_ig = valid_full %>% select(any_of(topfeatures), credit_risk)
-test_fs_ig = test_full %>% select(any_of(topfeatures), credit_risk)
+valid_fs_ig = valid_full %>% dplyr::select(any_of(topfeatures), credit_risk)
+test_fs_ig = test_full %>% dplyr::select(any_of(topfeatures), credit_risk)
 #Write train_fs_ig, valid_fs_ig, test_fs_ig, to new CSV files to be read in for creating classifier models
 write.csv(train_fs_ig, "train_fs_ig.csv", row.names=FALSE)
 write.csv(valid_fs_ig, "valid_fs_ig.csv", row.names=FALSE)

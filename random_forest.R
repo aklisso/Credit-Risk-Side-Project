@@ -20,7 +20,12 @@ rf.model = randomForest(
   data = train
 )
 
-tail(rf.model$err.rate) #error looks weirdly high for nonevents
+#Check training data AUC to verify overfitting is not occurring
+train.pred= predict(rf.model, type = "prob")
+train.pred = train.pred[,2]
+roc.train = roc(train$credit_risk, train.pred)
+auc(roc.train) #AUC is 0.79 - doesn't look like overfitting is happening :) 
+
 
 #AUC on validation data
 valid = read.csv("valid_fs_ig.csv")
@@ -31,16 +36,16 @@ valid.pred= predict(rf.model, newdata=valid, type = "prob")
 valid.pred = valid.pred[,2]
 library(pROC)
 roc.valid = roc(valid$credit_risk, valid.pred)
-auc(roc.valid) #not horrible- 0.778
+auc(roc.valid) 
 
 
-#Check training data AUC to verify overfitting is not occurring
-train.pred= predict(rf.model, type = "prob")
-train.pred = train.pred[,2]
-roc.train = roc(train$credit_risk, train.pred)
-auc(roc.train) #AUC is 0.79 - doesn't look like overfitting is happening :) 
+#get optimal cutoff for event based on ROC
+opt_cutoff = coords(roc.valid, "best", ret = "threshold")
 
-#Next- tune hyperparameters
+
+library(caret)
+valid.class = ifelse(valid.pred > opt_cutoff[[1]], 1, 0) #classify event based on cutoff
+confusionMatrix(table(valid.class,valid$credit_risk), positive="1") #get confusion matrix values
 
 
 
