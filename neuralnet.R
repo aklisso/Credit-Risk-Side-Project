@@ -52,6 +52,8 @@ colnames(train.nn)[1] = "credit_risk"
 # The same for validation and test data
 valid.nn <- as.data.frame(cbind(valid$credit_risk, valid.d))
 colnames(valid.nn)[1] = "credit_risk"
+test.nn <- as.data.frame(cbind(test$credit_risk, test))
+colnames(test)[1] = "credit_risk"
 
 #Oversample rare event in training data - this ended up creating overfitting so I will not use it.
 #library(ROSE)

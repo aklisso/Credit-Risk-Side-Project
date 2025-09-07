@@ -67,6 +67,6 @@ en_v_class = ifelse(en_v_pred > opt_cutoff[[1]], 1, 0)
 library(caret)
 confusionMatrix(table(en_v_class,valid$credit_risk), positive="1") 
 
-write.csv(valid.pred, "ENCV_pred_valid.csv", row.names=FALSE)
+write.csv(en_v_pred, "ENCV_pred_valid.csv", row.names=FALSE)
 
 

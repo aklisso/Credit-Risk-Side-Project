@@ -59,10 +59,10 @@ roc.train = roc(train$credit_risk, train.pred)
 auc(roc.train)
 
 #Find AUC on validation data
-valid.pred= predict(gbm.model, newdata=valid, n.trees = gbm.model$n.trees,
+gb_valid.pred= predict(gbm.model, newdata=valid, n.trees = gbm.model$n.trees,
                     type = "response") #get back probability instead of logit
 library(pROC)
-roc.valid = roc(valid$credit_risk, valid.pred)
+roc.valid = roc(valid$credit_risk, gb_valid.pred)
 auc(roc.valid) 
 
 #get optimal cutoff for event based on ROC
@@ -70,7 +70,7 @@ opt_cutoff = coords(roc.valid, "best", ret = "threshold")
 
 
 library(caret)
-valid.class = ifelse(valid.pred > opt_cutoff[[1]], 1, 0) #classify event based on cutoff
+valid.class = ifelse(gb_valid.pred > opt_cutoff[[1]], 1, 0) #classify event based on cutoff
 confusionMatrix(table(valid.class,valid$credit_risk), positive="1") 
 
-write.csv(valid.pred, "GB_pred_valid.csv", row.names=FALSE)
+write.csv(gb_valid.pred, "GB_pred_valid.csv", row.names=FALSE)
