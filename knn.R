@@ -88,3 +88,6 @@ library(caret)
 opt_cutoff = coords(knn_roc, "best", ret = "threshold")
 knn_valid_class = ifelse(valid_probs > opt_cutoff[[1]], 1, 0) 
 confusionMatrix(table(knn_valid_class,valid$credit_risk), positive="1") 
+
+write.csv(valid.pred, "KNN_pred_valid.csv", row.names=FALSE)
+

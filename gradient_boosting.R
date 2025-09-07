@@ -72,3 +72,5 @@ opt_cutoff = coords(roc.valid, "best", ret = "threshold")
 library(caret)
 valid.class = ifelse(valid.pred > opt_cutoff[[1]], 1, 0) #classify event based on cutoff
 confusionMatrix(table(valid.class,valid$credit_risk), positive="1") 
+
+write.csv(valid.pred, "GB_pred_valid.csv", row.names=FALSE)
