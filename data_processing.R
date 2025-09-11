@@ -1,4 +1,4 @@
-#Aim: reduce multicollinearity using filter-based feature selection 
+#Aim: replicate article results using filter-based feature selection 
 #(computationally less expensive than other techniques (wrapper, hybrid))
 library(mlr3)
 library(mlr3filters)
@@ -16,6 +16,14 @@ cat_vars = c("checkings", "credit_history", "purpose", "savings",
              "number_credits","job","people_liable","telephone",
              "foreign_worker","credit_risk")
 train_full = train_full %>% mutate (across(all_of(cat_vars), as.factor))
+
+
+#Check multicollinearity
+full_model = glm(credit_risk ~., data = train_fs_ig, 
+                 family = binomial(link="logit"))
+library(car)
+vifs = vif(full_model)
+vifs
 
 #Turn this classification problem into a task object
 task = TaskClassif$new(

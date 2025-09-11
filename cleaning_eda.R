@@ -137,22 +137,13 @@ full_model = glm(credit_risk ~., data = train,
                   family = binomial(link="logit"))
 library(car)
 vifs = vif(full_model)
-#employment duration, property, housing are all > 4. But collapsing categories isn't necessary.
-table(credit$employment_duration)
-table(credit$property)
-table(credit$housing)
-
-#According to online sources a value >4 may indicate multicollinearity, so we will address this later.
+#All of the GVIF^(1/(2*Df)) are below sqrt(5) = 2.24. So multicollinearity is not an issue.
 
 #Write cleaned data to CSV
 write.csv(credit, "credit_cleaned.csv", row.names=FALSE)
 write.csv(train, "credit_train.csv", row.names = FALSE)
 write.csv(valid, "credit_valid.csv", row.names = FALSE)
 write.csv(test, "credit_test.csv", row.names = FALSE)
-
-
-#***THERE ARE SPACES IN THE VARIABLE VALUES FOR PURPOSE - MUST FIX THIS
-#***For PURPOSE get rid of all funky characters like parentheses, spaces, slash, etc.
 
 
 
