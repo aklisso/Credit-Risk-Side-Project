@@ -42,19 +42,9 @@ feature_score_df = data.frame(
 #sort in descending order and choose the top few features
 feature_score_df = feature_score_df %>% arrange(desc(score))
 topfeatures = head(feature_score_df, n = 13)$feature
-#Got rid of number_credits, telephone, people_liable, age
 
 #Create new training dataset - training, feature selection, information gain
 train_fs_ig = train_full %>% dplyr::select(any_of(topfeatures), credit_risk)
-
-
-#Now, let's see if multicollinearity is reduced from before
-full_model = glm(credit_risk ~., data = train_fs_ig, 
-                 family = binomial(link="logit"))
-library(car)
-vifs = vif(full_model)
-vifs
-#Much better, now they're mostly 4 or less
 
 #Also select the same features from validation/testing sets
 #read in CSV's

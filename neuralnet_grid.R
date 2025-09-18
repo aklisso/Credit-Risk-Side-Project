@@ -53,6 +53,8 @@ colnames(train.nn)[1] = "credit_risk"
 # The same for validation and test data
 valid.nn <- as.data.frame(cbind(valid$credit_risk, valid.d))
 colnames(valid.nn)[1] = "credit_risk"
+test.nn <- as.data.frame(cbind(test$credit_risk, test.d))
+colnames(test.nn)[1] = "credit_risk"
 
 #Create formula to copy/paste into neuralnet.model since credit_risk ~ . won't work
 # (also calling "eqn" in the model won't work either)
@@ -60,6 +62,7 @@ predictors = setdiff(colnames(train.nn), "credit_risk")
 rhs = paste(predictors, collapse = " + ")
 eqn = as.formula(paste("credit_risk", rhs, sep = " ~ "))
 
+#Search for optimal number of hidden nodes
 library(neuralnet)
 hidden_values = c(1:21) #online sources say not to exceed # features
 gridsearch_df = data.frame(
@@ -87,7 +90,7 @@ for (i in hidden_values){
   gridsearch_df = rbind(gridsearch_df, data.frame(hidden_values = i, auc_valid = area_under_valid, auc_train = area_under_train))
 }
 
-View(gridsearch_df) #so far it looks like anything > 5 overfits. the best is 2 (AUC train ~0.86, AUC valid ~ 0.71)
+View(gridsearch_df) #so far it looks like anything > 5 overfits. the best is 2
 
 
 #Search for best stepmax (not searching for both at the same time because it will take much longer)
@@ -119,7 +122,7 @@ for (i in stepmax){
 
 View(gridsearch_df2) #they are all exactly the same
 
-
+library(neuralnet)
 set.seed(2025)
 neuralnet.model = neuralnet(
     eqn,
@@ -127,7 +130,7 @@ neuralnet.model = neuralnet(
     hidden = 2, 
     err.fct = "ce", #cross entropy error facet
     rep = 10,
-    stepmax = 17000,
+    stepmax = 1e6,
     linear.output = FALSE)
 
 library(pROC)
@@ -136,17 +139,35 @@ train.pred = predict(neuralnet.model, train.nn, type = "response")
 roc.train = roc(train.nn$credit_risk, as.vector(train.pred))
 auc(roc.train)
 
-#Check AUC on validation data
+#Check AUC/accuracy on validation data
 valid.pred = predict(neuralnet.model, newdata=valid.nn, type = "response")
 roc.valid = roc(valid.nn$credit_risk, as.vector(valid.pred))
 auc(roc.valid)
-
 #get optimal cutoff for event based on ROC
-opt_cutoff = coords(roc.valid, "best", ret = "threshold") #0.913 - oddly high
-
+opt_cutoff = coords(roc.valid, "best", ret = "threshold")
 library(caret)
 valid.class = ifelse(valid.pred > opt_cutoff[[1]], 1, 0) #classify event based on cutoff
 confusionMatrix(table(valid.class,valid$credit_risk), positive="1") #get confusion matrix values
 
-write.csv(valid.pred, "ANN_pred_valid.csv", row.names=FALSE)
 
+#Check AUC/accuracy on testing data
+# Check AUC on test data
+test.pred = predict(neuralnet.model, newdata = test.nn, type = "response")
+roc.test = roc(test.nn$credit_risk, as.vector(test.pred))
+auc(roc.test)
+
+# Get optimal cutoff for event based on ROC
+# NOTE: See the "Important Best Practices" note below.
+opt_cutoff = coords(roc.test, "best", ret = "threshold")
+# Get confusion matrix values using the cutoff
+library(caret)
+test.class = ifelse(test.pred > opt_cutoff[[1]], 1, 0) # classify event based on cutoff
+cm = confusionMatrix(table(as.factor(test.class), as.factor(test$credit_risk)), positive = "1")
+
+prec = cm$byClass[['Precision']]
+recall = cm$byClass[['Recall']]
+f1 = 2*prec*recall/(prec+recall)
+f1
+
+write.csv(valid.pred, "ANN_pred_valid.csv")
+write.csv(as.vector(test.pred), "ANN_pred_test.csv")

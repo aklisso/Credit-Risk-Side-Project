@@ -119,12 +119,10 @@ table(credit$number_credits) #verifying it was done correctly
 
 
 #Split into training/validation/testing before examining bivariate relationships
-# 60-30-10 split because we have a good amount of data, but not a ton
-# My statistics professor has recommended 70-20-10 for large datasets, and 50-40-10 for smaller
-# So this is a middle ground
+# 70-20-10 split
 library(splitTools)
 set.seed(2025)
-split = c(train = 0.6, valid = 0.3, test = 0.1)
+split = c(train = 0.7, valid = 0.2, test = 0.1)
 #Stratified split based on outcome
 inds = splitTools::partition(credit$credit_risk, split) #must specificy splitTools due to conflict w/ mlr3 package used later
 inds

@@ -65,29 +65,49 @@ knn_gridsearch = data.frame(
   AUC = aucs,
   K = neighbors
 )
-View(knn_gridsearch)
+#View(knn_gridsearch)
 
-knn_gridsearch$K[which.max(knn_gridsearch$AUC)] #optimal K is 27
+best_k = knn_gridsearch$K[which.max(knn_gridsearch$AUC)] #optimal K is 15
 
 #rerun with optimal K
 set.seed(2025)
 knn_valid = knn(train = train.dummies, 
                 test = valid.dummies, 
                 cl=train$credit_risk,
-                k = 27, #iterates through different values
+                k = best_k, #iterates through different values
                 prob = TRUE, 
                 use.all=FALSE)
-winner_probs = attr(knn_valid, "prob") # pull out "probability" of being in the selected class (either 0 or 1)
-valid_probs = ifelse(knn_valid=="1", winner_probs, 1-winner_probs) #if predicted class is 0, want 1-pr(0) to get pr(1)
-#AUC
-knn_roc = roc(response = valid$credit_risk, predictor= valid_probs)
+valid_winner_probs = attr(knn_valid, "prob") # pull out "probability" of being in the selected class (either 0 or 1)
+valid_probs = ifelse(knn_valid=="1", valid_winner_probs, 1-valid_winner_probs) #if predicted class is 0, want 1-pr(0) to get pr(1)
+#AUC on validation data
+knn_valid_roc = roc(response = valid$credit_risk, predictor= valid_probs)
 auc(knn_roc)
+
+#AUC on test data
+set.seed(2025)
+knn_test = knn(train = train.dummies, 
+                test = test.dummies, 
+                cl=train$credit_risk,
+                k = best_k, #iterates through different values
+                prob = TRUE, 
+                use.all=FALSE)
+test_winner_probs = attr(knn_test, "prob") # pull out "probability" of being in the selected class (either 0 or 1)
+test_probs = ifelse(knn_test=="1", test_winner_probs, 1-test_winner_probs) #if predicted class is 0, want 1-pr(0) to get pr(1)
+#AUC on validation data
+knn_test_roc = roc(response = test$credit_risk, predictor= test_probs)
+auc(knn_test_roc)
+
 
 #confusion matrix
 library(caret)
-opt_cutoff = coords(knn_roc, "best", ret = "threshold")
-knn_valid_class = ifelse(valid_probs > opt_cutoff[[1]], 1, 0) 
-confusionMatrix(table(knn_valid_class,valid$credit_risk), positive="1") 
+opt_cutoff = coords(knn_test_roc, "best", ret = "threshold")
+knn_test_class = ifelse(test_probs > opt_cutoff[[1]], 1, 0) 
+cm=confusionMatrix(table(knn_test_class,test$credit_risk), positive="1") 
 
-write.csv(valid_probs, "KNN_pred_valid.csv", row.names=FALSE)
+prec = cm$byClass[['Precision']]
+recall = cm$byClass[['Recall']]
+f1 = 2*prec*recall/(prec+recall)
+f1
 
+write.csv(valid_probs, "KNN_pred_valid.csv")
+write.csv(test_probs, "KNN_pred_test.csv")
