@@ -45,6 +45,9 @@ feature_score_df = data.frame(
 feature_score_df = feature_score_df %>% arrange(desc(score))
 topfeatures = head(feature_score_df, n = 13)$feature
 
+# Variables that were filtered out (excluding credit_risk):
+setdiff(colnames(train_full), topfeatures)
+
 # Create new training dataset with just the selected features
 train_fs_ig = train_full %>% dplyr::select(any_of(topfeatures), credit_risk)
 

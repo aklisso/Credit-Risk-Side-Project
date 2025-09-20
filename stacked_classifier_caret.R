@@ -66,6 +66,7 @@ ggplot(data = train_df, aes(x=log.duration.s)) + geom_histogram()
 ggplot(data = train_df, aes(x=log.amount.s)) + geom_histogram()
 
 library(caretEnsemble)
+set.seed(2025)
 # Create trainControl object to be passed into caretStack() function later
 train_control = trainControl(
   method = "cv",
@@ -76,6 +77,7 @@ train_control = trainControl(
 )
 
 # Create list of models to be used in stacked classifier
+set.seed(2025)
 model_list = caretEnsemble::caretList(
   credit_risk ~.,
   data = train_df,
@@ -99,6 +101,7 @@ caTools::colAUC(model_preds, test_df$credit_risk)
 # Between RF and NNET, NNET has higher AUC - remove RF.
 
 # Rerun stacked classifier with redundant models removed
+set.seed(2025)
 model_list2 = caretEnsemble::caretList(
   credit_risk ~.,
   data = train_df,
@@ -116,12 +119,11 @@ model_preds$stacked = predict(stacked_model, newdata = test_df, excluded_class_i
 # Compare AUC for all base models and stacked classifier
 caTools::colAUC(model_preds, test_df$credit_risk)
 
-#Stacked classifier has AUC of 0.7779282 on testing data - narrowly outperforms GBM and XGBtree.
-
 # Get stacked model's predicted probabilities as vector
 stacked_preds <- as.numeric(predict(stacked_model, newdata = test_df, excluded_class_id = 2L)[['bad_credit_risk']])
 test_outcomes = if_else(test_df$credit_risk == "bad_credit_risk", 1, 0)
 # Calculate AUC on testing data
+library(pROC)
 test_roc = roc(test_outcomes, stacked_preds)
 auc(test_roc)
 # Determine optimal cutoff using ROC
