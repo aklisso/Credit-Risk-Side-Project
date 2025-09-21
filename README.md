@@ -7,7 +7,7 @@ This project aims to predict credit risk (good vs poor) using supervised machine
 ### Data cleaning and partitioning
 To clean the data, variable names were translated to English, and sparse categories were collapsed to avoid model instability. The univariate distributions of continuous variables were assessed for skewness/violations of normality, which were present. This would impact later modeling. After splitting the data into training (70%), validation (20%), and test (10%) datasets, GVIF values were examined in the training dataset to rule out multicollinearity.
 ### Filter-based feature selection
-Although multicollinearity was not present, filter-based feature selection was performed using information gain criteria, which measures the reduction in uncertainty of the target variable when a feature of interest is known. This was to replicate the results of a journal article, as well as gain familiarity with a new method of reducing multicollinearity if it arises in future work. Feature selection can also speed up model training by reducing the volume of data. 
+Although multicollinearity was not present, filter-based feature selection was performed using information gain criteria, which measures the reduction in uncertainty of the target variable when a feature of interest is known. This was to replicate the results of a [journal article](https://journalofbigdata.springeropen.com/articles/10.1186/s40537-024-00882-0) , as well as gain familiarity with a new method of reducing multicollinearity if it arises in future work. Feature selection can also speed up model training by reducing the volume of data. 
 
 The top thirteen features were selected (as in the referenced article), and the following were eliminated:
 -	Installment rate
