@@ -5,8 +5,11 @@ This project aims to predict credit risk (good vs poor) using supervised machine
 
 ## Data Preparation
 ### Data cleaning and partitioning
+
 To clean the data, variable names were translated to English, and sparse categories were collapsed to avoid model instability. The univariate distributions of continuous variables were assessed for skewness/violations of normality, which were present. This would impact later modeling. After splitting the data into training (70%), validation (20%), and test (10%) datasets, GVIF values were examined in the training dataset to rule out multicollinearity.
+
 ### Filter-based feature selection
+
 Although multicollinearity was not present, filter-based feature selection was performed using information gain criteria, which measures the reduction in uncertainty of the target variable when a feature of interest is known. This was to replicate the results of a [journal article](https://journalofbigdata.springeropen.com/articles/10.1186/s40537-024-00882-0) , as well as gain familiarity with a new method of reducing multicollinearity if it arises in future work. Feature selection can also speed up model training by reducing the volume of data. 
 
 The top thirteen features were selected (as in the referenced article), and the following were eliminated:
@@ -20,6 +23,7 @@ The top thirteen features were selected (as in the referenced article), and the 
 
 ## Model Training
 ### Method 1: Manual model training/stacked classifier
+
 First, six ML models were trained separately and hyperparameters were tuned by inspection and/or conducting an automated search to maximize the AUC on validation data. Models came from various R packages, which were selected based on online documentation. 
 The following models were used:
 -	Random forest (RF)
@@ -32,9 +36,12 @@ The following models were used:
 Data were further processed independently for each model to ensure statistical assumptions were met and data were formatted properly to be used as model inputs (i.e. conversion to dummy variables, log transformations/standardization, etc.). 
 Predictions were generated on validation data, which were used to train a meta-model (logistic regression). Then, the base models were used to generate predictions on the test data, which were used as inputs to evaluate the meta-model’s performance.
 Base models were evaluated against the stacked classifier based on accuracy, AUC, and F1 score (table 1).
+
 ### Method 2: Stacked classifier using caretStack
+
 To determine whether a comparable stacked classifier could be built more efficiently, the caret package was used to automate the process of training/testing the stacked classifier. The validation and test datasets previously created were aggregated into a singular test dataset, since caret trains models using cross-validation, hence there was no need for a validation set. First, continuous variables in the training data were log-transformed to address skewness, and standardized to ensure compatibility with caret’s base models. These transformations were applied to the test data. The base models were then automatically trained/tuned using caretList with cross-validation to attain hyperparameters that maximized the AUC.
 Similarity between base models was evaluated using the modelCor function – if the similarity between two models exceeded 0.8, the model with the lower AUC on the training data was removed to reduce redundancy in the stacked classifier.
+
 A stacked classifier was trained/tested using caretStack, and evaluated based on accuracy, AUC, and F1 score (Table 1).
 Results and comparison of models
 Table 1 displays the candidate models’ accuracy, AUC, and F1 scores.
