@@ -28,6 +28,7 @@ The following models were used:
 -	Artificial neural network (ANN)
 -	Elastic net logistic regression
 -	Extreme gradient boosting (XGB)
+  
 Data were further processed independently for each model to ensure statistical assumptions were met and data were formatted properly to be used as model inputs (i.e. conversion to dummy variables, log transformations/standardization, etc.). 
 Predictions were generated on validation data, which were used to train a meta-model (logistic regression). Then, the base models were used to generate predictions on the test data, which were used as inputs to evaluate the meta-model’s performance.
 Base models were evaluated against the stacked classifier based on accuracy, AUC, and F1 score (table 1).
